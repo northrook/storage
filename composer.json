@@ -1,0 +1,30 @@
+{
+  "name": "northrook/storage",
+  "description": "Store arbitrary PHP data to disk, allowing it to be retrieved and modified at runtime, saved and OPcached on .",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Northrook\\Storage\\": "src"
+    }
+  },
+  "authors": [
+    {
+      "name": "Martin",
+      "email": "mn@northrook.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": ">=8.2",
+    "ext-zend-opcache": "*",
+    "northrook/core": "dev-main",
+    "northrook/filesystem": "dev-main",
+    "symfony/var-exporter": "@stable",
+    "northrook/compressor": "dev-main"
+  },
+  "require-dev": {
+    "northrook/dev-env": "dev-main"
+  }
+}
