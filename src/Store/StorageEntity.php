@@ -3,9 +3,9 @@
 namespace Northrook\Storage\Store;
 
 use InvalidArgumentException;
-use Northrook\Core\Timestamp;
+use Northrook\Logger\Log;
 use Northrook\Resource\Path;
-use Northrook\Storage\Autosave;
+use Northrook\Storage\OPcache;
 use Northrook\Storage\StorageManager;
 use Northrook\Time;
 use Symfony\Component\VarExporter\Exception\ExceptionInterface;
@@ -14,10 +14,6 @@ use function Northrook\classBasename;
 use function Northrook\getProjectRootDirectory;
 use function Northrook\hashKey;
 use function Northrook\normalizeKey;
-
-const
-AUTOSAVE_ON_SHUTDOWN = 'autosave-shutdown',
-AUTOSAVE_ON_DESTROY  = 'autosave-destroy';
 
 abstract class StorageEntity
 {
@@ -29,13 +25,19 @@ abstract class StorageEntity
     public readonly string $name;
 
     public function __construct(
-        ?string            $name = null,
-        ?string            $storagePath = null,
-        protected bool     $readonly = false,
-        protected Autosave $autosave = Autosave::DISABLED,
+        ?string        $name = null,
+        ?string        $storagePath = null,
+        protected bool $readonly = false,
+        protected bool $autosave = false,
     ) {
         $this->name        = $this->key( $name ?? classBasename( $this::class ) );
         $this->storagePath = new Path( $storagePath ?? StorageManager::get()->storageDirectory );
+    }
+
+    public function __destruct() {
+        if ( $this->autosave ) {
+            $this->save();
+        }
     }
 
     final protected function storagePath(
@@ -69,13 +71,16 @@ abstract class StorageEntity
         $data = $this->saveEntityData();
         $hash = $this->hash( $data );
 
-        if ( $this->storedHash ?? null !== $hash ) {
-            dump( ' We should indeed save this ' );
+        if ( ( $this->storedHash ?? null ) === $hash ) {
+            Log::info( "No need to save $this->name." );
+            return $this;
         }
 
         $dataStore = $this->createDataStore( $data, $hash );
 
         $this->storagePath->save( $dataStore );
+
+        OPcache::recompile( $this->storagePath->path );
 
         return $this;
     }
@@ -85,7 +90,7 @@ abstract class StorageEntity
         return $this;
     }
 
-    final public function autosave( Autosave $set = Autosave::ON_SHUTDOWN ) : self {
+    final public function autosave( bool $set = true ) : self {
         $this->autosave = $set;
         return $this;
     }

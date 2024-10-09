@@ -6,6 +6,7 @@
 
 # Composer
 /vendor/
+/var/
 /composer.phar
 
 # Build data

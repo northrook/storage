@@ -14,13 +14,14 @@ class ArrayStore extends StorageEntity
         string          $name,
         protected array $data = [],
         ?string         $storageDirectory = null,
+        protected bool  $autosave = false,
+        bool            $autoload = false,
     ) {
         parent::__construct( $name, $storageDirectory );
 
         $this->storagePath( $this->name, ( $this::class === self::class ) ? null : classBasename( $this::class ) );
 
-        $dataStore = $this->loadDataStore();
-        if ( $dataStore && $dataStore[ 'data' ] ) {
+        if ( $autoload && ( $dataStore = $this->loadDataStore() ) && isset( $dataStore[ 'data' ] ) ) {
             $this->data = $dataStore[ 'data' ];
         }
     }

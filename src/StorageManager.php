@@ -1,23 +1,25 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Northrook\Storage;
 
-use Northrook\Resource\Path;
 use Northrook\Trait\SingletonClass;
 use function Northrook\getProjectRootDirectory;
+use function Northrook\normalizePath;
 
 final class StorageManager
 {
     use SingletonClass;
-    
-    public readonly Path $storageDirectory;
+
+    public readonly string $storageDirectory;
 
     public function __construct(
         ?string $storageDirectory = null,
     ) {
         $this->instantiationCheck();
-        $this->storageDirectory = new Path(
-            $storageDirectory ?? getProjectRootDirectory() . '/var/storage',
+        $this->storageDirectory = normalizePath(
+            $storageDirectory ?? getProjectRootDirectory() . '/storage',
         );
         $this::$instance        = $this;
     }
