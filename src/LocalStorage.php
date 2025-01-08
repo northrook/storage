@@ -208,6 +208,11 @@ final class LocalStorage
         return $this->getData();
     }
 
+    public function hasChanges() : bool
+    {
+        return ! $this->locked;
+    }
+
     /**
      * Commits {@see LocalStorage::$data} to disk.
      *
